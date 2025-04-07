@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('companies', function (Blueprint $table) {
-        $table->id();
-        $table->timestamps();;
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('company_name');
+            $table->text('description')->nullable();
+            $table->timestamps();
         });
     }
 

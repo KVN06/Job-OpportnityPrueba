@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('job_offer_categories', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->unsignedBigInteger('job_offer_id');
+        $table->unsignedBigInteger('category_id');
+
+        $table->foreign('job_offer_id')->references('id')->on('job_offers')->onDelete('cascade');
+        $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 

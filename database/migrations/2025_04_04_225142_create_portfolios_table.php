@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('portfolios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('unemployed_id')->constrained('unemployed')->onDelete('cascade');
+            $table->unsignedBigInteger('unemployed_id');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('file_url')->nullable();
+            $table->string('file_url');
             $table->timestamp('created_at')->useCurrent();
+    
+            $table->foreign('unemployed_id')->references('id')->on('unemployed')->onDelete('cascade');
         });
     }
 

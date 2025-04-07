@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('unemployed', function (Blueprint $table) {
+        Schema::create('job_offers', function (Blueprint $table) {
             $table->id();
-        $table->unsignedBigInteger('user_id');
-        $table->string('profession')->nullable();
-        $table->text('experience')->nullable();
+        $table->unsignedBigInteger('company_id');
+        $table->string('title');
+        $table->text('description');
+        $table->decimal('salary', 10, 2)->nullable();
         $table->string('location')->nullable();
+        $table->string('geolocation')->nullable(); // Google Maps string or coordinates
+        $table->enum('offer_type', ['contract', 'classified']);
         $table->timestamps();
-
-        $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('unemployeds');
+        Schema::dropIfExists('job_offer');
     }
 };
