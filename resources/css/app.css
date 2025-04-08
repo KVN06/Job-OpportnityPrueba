@@ -1,11 +1,566 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body {
+    margin-left: 30px;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    width: 100%;
+}
+
+a {
+    text-decoration: none;
+    color: #1a1a1a;
+}
+
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle { display: none; }
+
+.sidebar-toggle-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1001;
+}
+
+.sidebar-content {
+    padding: 20px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-header img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar-menu li { margin-bottom: 15px; }
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    color: #333;
+}
+
+.sidebar-menu i {
+    width: 20px;
+    margin-right: 10px;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 20px;
+    width: calc(90% - 40px);
+}
+
+.app-card {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.app-card h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.app-card p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.main-content {
+    margin-left: 250px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: #fff;
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    border-radius: 50px;
+    max-width: 50px;
+    margin-right: 10px;
+}
+
+.logo span {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.header-links a {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.main-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    display: flex; /* Flexbox para alinear elementos */
+    justify-content: space-between; /* Espacio entre elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+    padding: 20px; /* Relleno */
+    background-color: #fff; /* Color de fondo */
+}
+
+/* Estilos de las acciones de la izquierda */
+.left-actions {
+    margin-left: auto; /* Margen izquierdo automático */
+    display: flex; /* Flexbox para alinear elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+    flex-grow: 1; /* Crece para ocupar espacio */
+}
+
+/* Estilos de las acciones de la derecha */
+.right-actions {
+    margin-right: 70px; /* Margen derecho */
+    display: flex; /* Flexbox para alinear elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+    gap: 20px; /* Espacio entre elementos */
+}
+
+/* Estilos de la barra de búsqueda */
+.search-bar {
+    display: flex; /* Flexbox para alinear elementos */
+    margin-right: 20px; /* Margen derecho */
+    flex-grow: 1; /* Crece para ocupar espacio */
+    max-width: 500px; /* Ancho máximo */
+}
+
+/* Estilos del input de la barra de búsqueda */
+.search-bar input {
+    flex-grow: 1; /* Crece para ocupar espacio */
+    padding: 15px; /* Relleno */
+    border: 1px solid #ccc; /* Borde */
+    border-radius: 5px 0 0 5px; /* Bordes redondeados */
+}
+
+/* Estilos del botón de la barra de búsqueda */
+.search-bar button {
+    padding: 10px 15px; /* Relleno */
+    background-color: #333; /* Color de fondo */
+    color: #fff; /* Color del texto */
+    border: none; /* Sin borde */
+    border-radius: 0 5px 5px 0; /* Bordes redondeados */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+}
+
+/* Estilos de los botones de filtro */
+.filter-buttons {
+    display: flex; /* Flexbox para alinear elementos */
+    gap: 10px; /* Espacio entre elementos */
+}
+
+/* Estilos de los botones de filtro y clasificados */
+.filter-btn, .classified-btn {
+    padding: 10px 15px; /* Relleno */
+    background-color: #f0f0f0; /* Color de fondo */
+    color: #333; /* Color del texto */
+    border: 1px solid #ccc; /* Borde */
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+}
+
+/* Estilos de la campana de notificaciones y botón de FAQ */
+.notification-bell, .faq-button {
+    font-size: 1.2em; /* Tamaño de la fuente */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    color: #333; /* Color del texto */
+    position: relative; /* Posición relativa para el conteo */
+}
+
+/* Estilos del conteo de notificaciones */
+.notification-count {
+    position: absolute; /* Posición absoluta */
+    top: -5px; /* Margen superior */
+    right: -5px; /* Margen derecho */
+    background-color: #ff4444; /* Color de fondo */
+    color: #fff; /* Color del texto */
+    font-size: 12px; /* Tamaño de la fuente */
+    padding: 2px 5px; /* Relleno */
+    border-radius: 50%; /* Bordes redondeados */
+}
+
+.add-job {
+    display: flex;
+    justify-content: center;
+}
+
+#addJobBtn, .edit-btn, .delete-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+}
+
+#addJobBtn {
+    background-color: #333;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.job-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.edit-btn { background-color: #333; }
+.delete-btn { background-color: #b13a46; }
+
+/* Estilos de la sección de introducción */
+.intro {
+    text-align: center; /* Centra el texto */
+    padding: 20px 0; /* Relleno */
+    background-color: #fff; /* Color de fondo */
+}
+
+/* Estilos del título de introducción */
+.intro h1 {
+    font-size: 2em; /* Tamaño de la fuente */
+    margin-bottom: 20px; /* Margen inferior */
+}
+
+/* Estilos del texto de introducción */
+.intro p {
+    font-size: 1.1em; /* Tamaño de la fuente */
+    max-width: 800px; /* Ancho máximo */
+    margin: 0 auto; /* Centra el texto */
+}
+
+/* Estilos de las publicaciones de trabajo */
+.job-posts {
+    padding: 40px 20px; /* Relleno */
+}
+
+/* Estilos del título de publicaciones de trabajo */
+.job-posts h2 {
+    text-align: center; /* Centra el texto */
+    margin-bottom: 20px; /* Margen inferior */
+}
+
+/* Estilos de las tarjetas de trabajo */
+.job-cards {
+    display: grid; /* Grid para las tarjetas */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Columnas responsivas */
+    gap: 20px; /* Espacio entre tarjetas */
+    max-width: 1200px; /* Ancho máximo */
+    margin: 0 auto; /* Centra las tarjetas */
+}
+
+/* Estilos de cada tarjeta de trabajo */
+.job-card {
+    border: 1px solid #ddd; /* Borde */
+    border-radius: 5px; /* Bordes redondeados */
+    overflow: hidden; /* Oculta el desbordamiento */
+    background-color: #fff; /* Color de fondo */
+    transition: box-shadow 0.3s ease; /* Transición suave para la sombra */
+}
+
+/* Estilos al pasar el mouse sobre la tarjeta de trabajo */
+.job-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra al pasar el mouse */
+}
+
+/* Estilos de la imagen de la tarjeta de trabajo */
+.job-card img {
+    width: 100%; /* Ancho completo */
+    height: 150px; /* Altura fija */
+    object-fit: cover; /* Ajusta la imagen */
+}
+
+/* Estilos del contenido de la tarjeta */
+.card-content {
+    padding: 15px; /* Relleno */
+}
+
+/* Estilos del título del contenido de la tarjeta */
+.card-content h3 {
+    margin: 10px 0; /* Margen */
+}
+
+/* Estilos del texto del contenido de la tarjeta */
+.card-content p {
+    font-size: 1rem; /* Tamaño de la fuente */
+    color: #777; /* Color del texto */
+}
+
+/* Estilos del pie de página */
+footer {
+    margin-left: 10px; /* Margen izquierdo */
+    background-color: #fff; /* Color de fondo */
+    padding: 30px 0; /* Relleno */
+    border-top: 1px solid #ddd; /* Borde superior */
+    margin-top: auto; /* Empuja el pie hacia abajo */
+}
+
+/* Estilos del contenedor del pie de página */
+.footer-container {
+    max-width: 1200px; /* Ancho máximo */
+    margin: 0 auto; /* Centra el contenedor */
+    display: flex; /* Flexbox para alinear elementos */
+    justify-content: space-between; /* Espacio entre elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+    padding: 0 50px; /* Relleno */
+}
+
+/* Estilos del logo del pie de página */
+.footer-logo span {
+    font-size: 1.2rem; /* Tamaño de la fuente */
+    font-weight: bold; /* Negrita */
+}
+
+/* Estilos de los enlaces sociales del pie de página */
+.footer-social {
+    display: flex; /* Flexbox para alinear elementos */
+    gap: 15px; /* Espacio entre elementos */
+}
+
+/* Estilos de las imágenes de los enlaces sociales */
+.footer-social img {
+    width: 30px; /* Ancho de la imagen */
+    height: 30px; /* Altura de la imagen */
+}
+
+/* Estilos del modal */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Fija el modal */
+    top: 0; /* Posición en la parte superior */
+    left: 0; /* Posición a la izquierda */
+    width: 100%; /* Ancho completo */
+    height: 100%; /* Altura completa */
+    background-color: rgba(0,0,0,0.5); /* Fondo semi-transparente */
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+/* Estilos del contenido del modal */
+.modal-content {
+    background-color: #fefefe; /* Color de fondo */
+    margin: 5% auto; /* Margen automático */
+    padding: 20px; /* Relleno */
+    border-radius: 8px; /* Bordes redondeados */
+    width: 80%; /* Ancho del modal */
+    max-width: 600px; /* Ancho máximo */
+}
+
+/* Estilos del encabezado del modal */
+.modal-header {
+    display: flex; /* Flexbox para alinear elementos */
+    justify-content: space-between; /* Espacio entre elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+    border-bottom: 1px solid #ddd; /* Borde inferior */
+    padding-bottom: 10px; /* Relleno inferior */
+}
+
+/* Estilos del botón de cerrar del modal */
+.close {
+    font-size: 28px; /* Tamaño de la fuente */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+}
+
+/* Estilos de la sección de configuración */
+.config-section {
+    margin: 20px 0; /* Margen */
+}
+
+/* Estilos de las opciones de configuración */
+.config-option {
+    display: flex; /* Flexbox para alinear elementos */
+    justify-content: space-between; /* Espacio entre elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+    margin: 15px 0; /* Margen */
+}
+
+/* Estilos del interruptor */
+.switch {
+    position: relative; /* Posición relativa */
+    display: inline-block; /* Muestra en línea */
+    width: 60px; /* Ancho del interruptor */
+    height: 34px; /* Altura del interruptor */
+}
+
+/* Estilos del input del interruptor */
+.switch input {
+    opacity: 0; /* Oculta el input */
+    width: 0; /* Ancho cero */
+    height: 0; /* Altura cero */
+}
+
+/* Estilos del slider del interruptor */
+.slider {
+    position: absolute; /* Posición absoluta */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el slider */
+    top: 0; /* Posición superior */
+    left: 0; /* Posición izquierda */
+    right: 0; /* Posición derecha */
+    bottom: 0; /* Posición inferior */
+    background-color: #ccc; /* Color de fondo */
+    transition: .4s; /* Transición suave */
+}
+
+/* Estilos del antes del slider */
+.slider:before {
+    position: absolute; /* Posición absoluta */
+    content: ""; /* Contenido vacío */
+    height: 26px; /* Altura */
+    width: 26px; /* Ancho */
+    left: 4px; /* Margen izquierdo */
+    bottom: 4px; /* Margen inferior */
+    background-color: white; /* Color de fondo */
+    transition: .4s; /* Transición suave */
+}
+
+/* Estilos del slider redondeado */
+.slider.round {
+    border-radius: 34px; /* Bordes redondeados */
+}
+
+/* Estilos del antes del slider redondeado */
+.slider.round:before {
+    border-radius: 50%; /* Bordes redondeados */
+}
+
+/* Estilos del slider cuando está activado */
+input:checked + .slider {
+    background-color: #2196F3; /* Color de fondo cuando está activado */
+}
+
+/* Estilos del antes del slider cuando está activado */
+input:checked + .slider:before {
+    transform: translateX(26px); /* Mueve el slider */
+}
+
+/* Estilos del modo oscuro */
+body.dark-mode {
+    background-color: #1a1a1a; /* Color de fondo en modo oscuro */
+    color: #fff; /* Color del texto en modo oscuro */
+}
+
+/* Estilos de los elementos en modo oscuro */
+body.dark-mode .modal-content,
+body.dark-mode .sidebar,
+body.dark-mode .main-content,
+body.dark-mode .job-card,
+body.dark-mode .main-actions,
+body.dark-mode .intro,
+body.dark-mode .app-card,
+body.dark-mode header,
+body.dark-mode footer,
+body.dark-mode .header-container,
+body.dark-mode .footer-container {
+    background-color: #2d2d2d; /* Color de fondo en modo oscuro */
+    color: #fff; /* Color del texto en modo oscuro */
+    border-color: #404040; /* Color del borde en modo oscuro */
+}
+
+/* Estilos de los enlaces en modo oscuro */
+body.dark-mode a,
+body.dark-mode .sidebar-menu a,
+body.dark-mode .card-content h3 a,
+body.dark-mode .notification-bell,
+body.dark-mode .faq-button {
+    color: #fff; /* Color del texto en modo oscuro */
+}
+
+/* Estilos del texto de la tarjeta en modo oscuro */
+body.dark-mode .card-content p {
+    color: #bbb; /* Color del texto en modo oscuro */
+}
+
+/* Estilos de la barra de búsqueda en modo oscuro */
+body.dark-mode .search-bar input,
+body.dark-mode select {
+    background-color: #404040; /* Color de fondo en modo oscuro */
+    color: #fff; /* Color del texto en modo oscuro */
+    border-color: #555; /* Color del borde en modo oscuro */
+}
+
+/* Estilos del botón de búsqueda y botones de filtro en modo oscuro */
+body.dark-mode .search-bar button,
+body.dark-mode .filter-btn,
+body.dark-mode .classified-btn {
+    background-color: #404040; /* Color de fondo en modo oscuro */
+    color: #fff; /* Color del texto en modo oscuro */
+    border-color: #555; /* Color del borde en modo oscuro */
+}
+
+/* Estilos de los enlaces del encabezado en modo oscuro */
+body.dark-mode .header-links a {
+    background-color: #404040; /* Color de fondo en modo oscuro */
+    color: #fff; /* Color del texto en modo oscuro */
+}
+
+/* Estilos de las tarjetas de la aplicación en modo oscuro */
+body.dark-mode .app-card {
+    background-color: #404040; /* Color de fondo en modo oscuro */
+}
+
+/* Estilos de las imágenes de los enlaces sociales en modo oscuro */
+body.dark-mode .footer-social img {
+    filter: brightness(0.8); /* Ajusta el brillo en modo oscuro */
+}
+
+
