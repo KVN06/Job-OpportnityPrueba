@@ -11,7 +11,7 @@
                 <!-- Menú de navegación -->
                 <nav class="hidden md:flex items-center space-x-6">
                     <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Inicio</a>
-                    <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Foros/Capacitaciones</a>
+                    <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
                     <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Clasificados</a>
                     <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">FAQs</a>
                     <a href="{{ route('register') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Registrarse</a>
@@ -28,7 +28,6 @@
             <div class="md:hidden hidden" id="mobileMenu">
                 <nav class="py-4 space-y-4">
                     <a href="{{ route('home') }}" class="block text-gray-600 hover:text-blue-600">Inicio</a>
-                    <a href="" class="block text-gray-600 hover:text-blue-600">Foros</a>
                     <a href="" class="block text-gray-600 hover:text-blue-600">Clasificados</a>
                     <a href="" class="block text-gray-600 hover:text-blue-600">Mensajes</a>
                     <a href="" class="block text-gray-600 hover:text-blue-600">Configuración</a>

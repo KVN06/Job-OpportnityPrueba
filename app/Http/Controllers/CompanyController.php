@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
@@ -12,11 +13,11 @@ class CompanyController extends Controller
 
     public function agg_company(Request $request) {
         $company = new Company();
-        $company->user_id = $request->user_id;
+        $company->user_id = Auth::id();
         $company->company_name = $request->company_name;
         $company->description = $request->description;
         $company->save();
-
-        return $company;
+    
+        return redirect()->route('home');
     }
 }

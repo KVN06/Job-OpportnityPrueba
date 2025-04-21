@@ -23,9 +23,9 @@
                     <label for="type" class="block text-gray-700 font-medium">Tipo de Usuario</label>
                     <select name="type" id="type" required>
                         <option value="">Seleccione una opción</option>
-                        <option value="job_seeker">Desempleado</option>
+                        <option value="unemployed">Desempleado</option>
                         <option value="company">Empresa</option>
-                    </select>
+                    </select>                  
                     <br>
                 </div>
                 <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-400">Registrarse</button>

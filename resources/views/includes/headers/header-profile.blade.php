@@ -11,7 +11,7 @@
             <!-- Menú de navegación -->
             <nav class="hidden md:flex items-center space-x-6">
                 <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Inicio</a>
-                <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Foros/Capacitaciones</a>
+                <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Clasificados</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">FAQs</a>
                 <div class="relative" id="notificationsDropdown">
@@ -39,7 +39,7 @@
                     </button>
                     <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50">
                         <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mi Perfil</a>
-                        <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mensajes</a>
+                        <a href="{{ route('messages') }}" class="relative block px-4 py-2 text-gray-700 hover:bg-gray-100">Mensajes</a>
                         <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Configuración</a>
                         <hr class="my-2">
                         <a href="{{ route('logout') }}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Cerrar Sesión</a>
@@ -57,10 +57,9 @@
         <div class="md:hidden hidden" id="mobileMenu">
             <nav class="py-4 space-y-4">
                 <a href="{{ route('home') }}" class="block text-gray-600 hover:text-blue-600">Inicio</a>
-                <a href="" class="block text-gray-600 hover:text-blue-600">Foros</a>
                 <a href="" class="block text-gray-600 hover:text-blue-600">Clasificados</a>
                 <a href="" class="block text-gray-600 hover:text-blue-600">Mi Perfil</a>
-                <a href="" class="block text-gray-600 hover:text-blue-600">Mensajes</a>
+                <a href="{{ route('messages') }}" class="block text-gray-600 hover:text-blue-600">Mensajes</a>
                 <a href="" class="block text-gray-600 hover:text-blue-600">Configuración</a>
                 <a href="{{ route('logout') }}" class="block text-red-600 hover:text-red-800">Cerrar Sesión</a>
             </nav>

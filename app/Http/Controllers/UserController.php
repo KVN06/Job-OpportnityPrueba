@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\Company;
+use App\Models\Unemployed;
 
 class UserController extends Controller
 {
@@ -17,10 +19,16 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = $request->password;
         $user->type = $request->type;
-        $user->email_verified_at = now(); // Verificación inmediata
+        $user->email_verified_at = now();
         $user->save();
-        Auth::login($user); // Iniciar sesión automáticamente después de crear el usuario
-        return redirect()->route('home') ;
+    
+        Auth::login($user);
+        // Redirigir según el tipo de usuario
+        if ($user->type == 'unemployed') {
+            return redirect()->route('unemployed-form'); // Ruta al formulario de desempleado
+        } else {
+            return redirect()->route('company-form'); // Ruta al formulario de empresa
+        }
     }
 
 
@@ -47,5 +55,8 @@ class UserController extends Controller
         $request->session()->regenerateToken();
         return redirect(route('login'));
     }
+
+
+    
 
 }

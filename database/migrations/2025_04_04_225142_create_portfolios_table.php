@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('file_url');
             $table->timestamp('created_at')->useCurrent();
     
-            $table->foreign('unemployed_id')->references('id')->on('unemployed')->onDelete('cascade');
+            $table->foreign('unemployed_id')->references('id')->on('unemployeds')->onDelete('cascade');
         });
     }
 

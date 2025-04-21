@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
         $table->text('message')->nullable();
         $table->unsignedBigInteger('unemployed_id')->nullable();
-        $table->foreign('unemployed_id')->references('id')->on('unemployed')->onDelete('cascade');
+        $table->foreign('unemployed_id')->references('id')->on('unemployeds')->onDelete('cascade');
 
         $table->unsignedBigInteger('job_offer_id')->nullable();
         $table->foreign('job_offer_id')->references('id')->on('job_offers')->onDelete('cascade');
