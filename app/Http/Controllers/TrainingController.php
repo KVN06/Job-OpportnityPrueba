@@ -1,25 +1,39 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Training;
 use Illuminate\Http\Request;
 
 class TrainingController extends Controller
 {
-    public function create() {
-        return view('Training-form');
+    public function create()
+    {
+        $trainings = Training::all(); 
+        return view('training-form', compact('trainings'));
     }
 
-    public function agg_training(Request $request) {
-        $training = new Training();
-        $training->title = $request->title;
-        $training->description = $request->description;
-        $training->link = $request->link;
-        $training->provider = $request->provider;
-        $training->start_date = $request->start_date;
-        $training->end_date = $request->end_date;
-        $training->save();
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'provider' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'link' => 'nullable|url',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
 
-        return $training;
+        Training::create($request->all());
+
+        return redirect()->route('training.create')->with('success', 'Capacitación guardada exitosamente.');
+    }
+
+    public function destroy($id)
+    {
+        $training = Training::findOrFail($id);
+        $training->delete();
+
+        return redirect()->route('training.create')->with('success', 'Capacitación eliminada.');
     }
 }

@@ -25,3 +25,15 @@ Route::get('/unemployed-form', [UnemployedController::class, 'create'])->name('u
 Route::post('/agg-unemployed', [UnemployedController::class, 'agg_unemployed'])->name('agg-unemployed');
 Route::get('/company-form', [CompanyController::class, 'create'])->name('company-form');
 Route::post('/agg-company', [CompanyController::class, 'agg_company'])->name('agg-company');
+
+
+
+
+
+
+use App\Http\Controllers\TrainingController;
+
+Route::get('/training', [TrainingController::class, 'create'])->name('training.create');
+Route::post('/training', [TrainingController::class, 'store'])->name('training.store');
+Route::delete('/training/{id}', [TrainingController::class, 'destroy'])->name('training.destroy');
+
