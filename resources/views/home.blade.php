@@ -9,7 +9,7 @@
             <h1 class="text-4xl md:text-5xl font-bold mb-6">Encuentra tu próxima oportunidad laboral</h1>
             <p class="text-xl mb-8">Conectamos talento con las mejores empresas</p>
             <div class="flex flex-col md:flex-row gap-4 justify-center">
-                <a href="" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                <a href="{{ route('job-offers.index') }}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                     Buscar Empleos
                 </a>
             </div>
@@ -36,7 +36,7 @@
     <section class="mb-12">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Empleos Destacados</h2>
-            <a href="" class="text-blue-600 hover:text-blue-800">Ver todos →</a>
+            <a href="{{ route('job-offers.index') }}" class="text-blue-600 hover:text-blue-800">Ver todos →</a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="featuredJobs">
             <!-- Los trabajos se cargarán dinámicamente aquí -->
@@ -47,28 +47,28 @@
     <section class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Categorías Populares</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <a href="" class="group">
+            <a href="{{ route('job-offers.index', ['category' => 'tecnologia']) }}" class="group">
                 <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <i class="fas fa-laptop-code text-3xl text-blue-600 mb-3"></i>
                     <h3 class="font-semibold group-hover:text-blue-600">Tecnología</h3>
                     <p class="text-sm text-gray-600">1,200+ empleos</p>
                 </div>
             </a>
-            <a href="" class="group">
+            <a href="{{ route('job-offers.index', ['category' => 'marketing']) }}" class="group">
                 <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <i class="fas fa-chart-line text-3xl text-blue-600 mb-3"></i>
                     <h3 class="font-semibold group-hover:text-blue-600">Marketing</h3>
                     <p class="text-sm text-gray-600">800+ empleos</p>
                 </div>
             </a>
-            <a href="" class="group">
+            <a href="{{ route('job-offers.index', ['category' => 'diseno']) }}" class="group">
                 <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <i class="fas fa-paint-brush text-3xl text-blue-600 mb-3"></i>
                     <h3 class="font-semibold group-hover:text-blue-600">Diseño</h3>
                     <p class="text-sm text-gray-600">600+ empleos</p>
                 </div>
             </a>
-            <a href="" class="group">
+            <a href="{{ route('job-offers.index', ['category' => 'ventas']) }}" class="group">
                 <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <i class="fas fa-handshake text-3xl text-blue-600 mb-3"></i>
                     <h3 class="font-semibold group-hover:text-blue-600">Ventas</h3>
@@ -82,17 +82,17 @@
     <section class="bg-gray-50 rounded-xl p-8 mb-12">
         <h2 class="text-2xl font-bold mb-6">Recursos para tu Carrera</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <a href="#" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <i class="fas fa-users text-2xl text-blue-600 mb-3"></i>
                 <h3 class="font-semibold mb-2">Foros de Discusión</h3>
                 <p class="text-gray-600 text-sm">Conéctate con otros profesionales</p>
             </a>
-            <a href="" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <a href="#" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <i class="fas fa-graduation-cap text-2xl text-blue-600 mb-3"></i>
                 <h3 class="font-semibold mb-2">Capacitaciones</h3>
                 <p class="text-gray-600 text-sm">Mejora tus habilidades</p>
             </a>
-            <a href="" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <a href="#" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <i class="fas fa-book-reader text-2xl text-blue-600 mb-3"></i>
                 <h3 class="font-semibold mb-2">Blog</h3>
                 <p class="text-gray-600 text-sm">Consejos y tendencias</p>

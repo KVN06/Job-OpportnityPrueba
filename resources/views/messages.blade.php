@@ -17,10 +17,6 @@
         <form action="{{ route('send-message') }}" method="POST">
             @csrf
             <div class="space-y-4">
-                <div>
-                    <label for="sender_id" class="block text-gray-700 font-medium">Remitente (ID)</label>
-                    <input type="number" id="sender_id" name="sender_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
-                </div>
 
                 <div>
                     <label for="receiver_id" class="block text-gray-700 font-medium">Destinatario (ID)</label>
