@@ -17,7 +17,9 @@
             </div>
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-400">CONTINUAR</button>
         </form>
-        <a href="" class="block text-center text-blue-500 mt-4 hover:underline">¿Olvidaste tu contraseña?</a>
+        <div class="mt-4 text-center">
+            <a href="{{ route('register') }}" class="text-blue-500 hover:underline">¿No tienes cuenta? Regístrate</a>
+        </div>
     </div>
 </main>
 </form>

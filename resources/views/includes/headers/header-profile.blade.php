@@ -10,6 +10,7 @@
 
             <!-- Menú de navegación -->
             <nav class="hidden md:flex items-center space-x-6">
+                @auth
                 <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Inicio</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Clasificados</a>
@@ -34,16 +35,31 @@
                 <div class="relative" id="userDropdown">
                     <button class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
                         <img src="Estilos/Imagenes/proyecto2.jpeg" alt="Usuario" class="w-8 h-8 rounded-full mr-2">
-                        <span>@auth{{Auth::user()->name}}@endauth </span>
+                        <div class="flex flex-col items-center">
+                            <span class="text-sm font-medium max-w-[120px] truncate">{{ auth()->user()->name }}</span>
+                            <span class="text-xs text-gray-500 -mt-0.5">
+                                @if(auth()->user()->isCompany())
+                                    Empresa
+                                @else
+                                    Cesante
+                                @endif
+                            </span>
+                        </div>
                         <i class="fas fa-chevron-down ml-2"></i>
                     </button>
                     <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50">
-                        <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mi Perfil</a>
+                        @if(auth()->user()->isUnemployed())
+                        <a href="{{ route('portfolio-list') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Portafolio</a>
+                        @endif
+                        @if(auth()->user()->isCompany())
+                        <a href="{{ route('job-offers.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Crear Oferta</a>
+                        @endif
                         <a href="{{ route('messages') }}" class="relative block px-4 py-2 text-gray-700 hover:bg-gray-100">Mensajes</a>
                         <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Configuración</a>
                         <hr class="my-2">
                         <a href="{{ route('logout') }}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Cerrar Sesión</a>
                     </div>
+                    @endauth
                 </div>
             </nav>
 

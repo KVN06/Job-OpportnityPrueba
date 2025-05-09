@@ -37,3 +37,43 @@ Route::get('/training', [TrainingController::class, 'create'])->name('training.c
 Route::post('/training', [TrainingController::class, 'store'])->name('training.store');
 Route::delete('/training/{id}', [TrainingController::class, 'destroy'])->name('training.destroy');
 
+
+
+
+    // Ver la lista de portafolios
+    Route::get('/portfolio-list', [PortfolioController::class, 'list'])->name('portfolio-list');
+    
+    // Crear un nuevo portafolio
+    Route::get('/portfolio-form', [PortfolioController::class, 'create'])->name('portfolio-form');
+    Route::post('/agg-portfolio', [PortfolioController::class, 'store'])->name('agg-portfolio');
+    
+    // Editar un portafolio
+    Route::get('/portfolio-edit/{id}', [PortfolioController::class, 'edit'])->name('edit-portfolio');
+    Route::post('/portfolio-update/{id}', [PortfolioController::class, 'update'])->name('update-portfolio');
+    
+    // Eliminar un portafolio
+    Route::delete('/portfolio-delete/{id}', [PortfolioController::class, 'destroy'])->name('delete-portfolio');
+
+
+
+    Route::get('/joboffers', [JobOfferController::class, 'index'])->name('job-offers.index');
+    Route::get('/crear', [JobOfferController::class, 'create'])->name('job-offers.create');
+    Route::post('/joboffers', [JobOfferController::class, 'store'])->name('job-offers.store');
+    Route::get('/joboffers/{jobOffer}', [JobOfferController::class, 'show'])->name('job-offers.show');
+    Route::get('/joboffers/{jobOffer}/editar', [JobOfferController::class, 'edit'])->name('job-offers.edit');
+    Route::put('/joboffers/{jobOffer}', [JobOfferController::class, 'update'])->name('job-offers.update');
+    Route::delete('/joboffers/{jobOffer}', [JobOfferController::class, 'destroy'])->name('job-offers.destroy');
+    
+
+    // Rutas de ofertas favoritas
+    Route::get('/favoriteOffer', [FavoriteOfferController::class, 'index'])->name('favorite-offers.index');
+    Route::post('//ofertas/{jobOffer}/favorite', [FavoriteOfferController::class, 'toggle'])->name('job-offers.toggle-favorite');
+    // Rutas de postulacioness
+    Route::post('/job-applications', [JobApplicationController::class, 'store'])->name('job-applications.store');
+
+    Route::get('/Companies', [CompanyController::class, 'index'])->name('index');
+    Route::get('/Company/{company}', [CompanyController::class, 'show'])->name('show');
+
+
+
+
