@@ -1,14 +1,17 @@
-@extends('layouts.home')
+@extends('layouts.home') 
+{{-- Extiende la plantilla principal del layout "home" --}}
 
 @section('content')
-<!-- Main Content -->
+<!-- Contenido principal -->
 <main class="container mx-auto py-8 px-6">
-    <!-- Hero Section -->
+
+    <!-- Sección de portada con CTA -->
     <section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-12 mb-12">
         <div class="max-w-3xl mx-auto text-center">
             <h1 class="text-4xl md:text-5xl font-bold mb-6">Encuentra tu próxima oportunidad laboral</h1>
             <p class="text-xl mb-8">Conectamos talento con las mejores empresas</p>
             <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <!-- Botón para ir a la lista de empleos -->
                 <a href="{{ route('job-offers.index') }}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                     Buscar Empleos
                 </a>
@@ -16,7 +19,7 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
+    <!-- Sección de estadísticas destacadas -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div class="bg-white p-6 rounded-lg shadow-sm text-center">
             <div class="text-3xl font-bold text-blue-600 mb-2">5,000+</div>
@@ -32,21 +35,24 @@
         </div>
     </section>
 
-    <!-- Featured Jobs -->
+    <!-- Empleos destacados -->
     <section class="mb-12">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Empleos Destacados</h2>
+            <!-- Enlace para ver todos los empleos -->
             <a href="{{ route('job-offers.index') }}" class="text-blue-600 hover:text-blue-800">Ver todos →</a>
         </div>
+        <!-- Contenedor donde se cargarán dinámicamente los trabajos destacados -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="featuredJobs">
-            <!-- Los trabajos se cargarán dinámicamente aquí -->
+            <!-- Aquí se inyectarán trabajos con JavaScript o desde el controlador -->
         </div>
     </section>
 
-    <!-- Categories Section -->
+    <!-- Categorías más populares -->
     <section class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Categorías Populares</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Cada enlace lleva a la lista de empleos filtrada por categoría -->
             <a href="{{ route('job-offers.index', ['category' => 'tecnologia']) }}" class="group">
                 <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <i class="fas fa-laptop-code text-3xl text-blue-600 mb-3"></i>
@@ -78,10 +84,11 @@
         </div>
     </section>
 
-    <!-- Resources Section -->
+    <!-- Sección de recursos útiles -->
     <section class="bg-gray-50 rounded-xl p-8 mb-12">
         <h2 class="text-2xl font-bold mb-6">Recursos para tu Carrera</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Recursos como foros, capacitaciones, blog, etc. -->
             <a href="#" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <i class="fas fa-users text-2xl text-blue-600 mb-3"></i>
                 <h3 class="font-semibold mb-2">Foros de Discusión</h3>
@@ -99,8 +106,6 @@
             </a>
         </div>
     </section>
+
 </main>
 @endsection
-
-@csrf
-
