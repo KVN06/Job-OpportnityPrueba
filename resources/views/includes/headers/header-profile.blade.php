@@ -12,7 +12,7 @@
                 @auth
                     <!-- Enlaces principales del menú -->
                     <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Inicio</a>
-                    <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
+                    <a href="{{ route('training.index') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
                     <a href="{{ route('job-offers.index', ['offer_type' => 'classified']) }}" class="text-gray-600 hover:text-blue-600 transition-colors">Clasificados</a>
                     <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">FAQs</a>
 

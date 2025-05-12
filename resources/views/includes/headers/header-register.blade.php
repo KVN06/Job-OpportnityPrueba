@@ -15,7 +15,7 @@
             <nav class="hidden md:flex items-center space-x-6">
                 <!-- Enlaces de navegación visibles solo cuando el usuario NO ha iniciado sesión -->
                 <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Inicio</a>
-                <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
+                <a href="{{ route('training.index') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Clasificados</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">FAQs</a>
                 <!-- Enlaces de autenticación -->

@@ -63,5 +63,20 @@ Route::post('/agg-company', [CompanyController::class, 'agg_company'])->name('ag
     Route::get('/Company/{company}', [CompanyController::class, 'show'])->name('show');
 
 
+Route::get('/capacitaciones', [TrainingController::class, 'index'])->name('training.index');
+Route::get('/capacitaciones/crear', [TrainingController::class, 'create'])->name('training.create');
+Route::post('/capacitaciones', [TrainingController::class, 'store'])->name('training.store');
+Route::get('/capacitaciones/{id}/editar', [TrainingController::class, 'edit'])->name('training.edit');
+Route::put('/capacitaciones/{id}', [TrainingController::class, 'update'])->name('training.update');
+Route::delete('/capacitaciones/{id}', [TrainingController::class, 'destroy'])->name('training.destroy');
+
+
+
+
+
+
+ 
+
+
 
 
