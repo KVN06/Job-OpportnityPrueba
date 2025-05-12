@@ -12,6 +12,8 @@
             <nav class="hidden md:flex items-center space-x-6">
                 @auth
                 <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition-colors">Inicio</a>
+
+                <!-- aqui -->
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Capacitaciones</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">Clasificados</a>
                 <a href="" class="text-gray-600 hover:text-blue-600 transition-colors">FAQs</a>
