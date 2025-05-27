@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class MessageController extends Controller
 {
     // Mostrar el formulario para enviar un nuevo mensaje
     public function create()
     {
-        return view('message-form');
+        // Puedes pasar la lista de usuarios aquí para el select destinatarios si quieres
+        $users = User::select('id', 'name')->get();
+
+        return view('message-form', compact('users'));
     }
 
     // Enviar un mensaje a otro usuario
@@ -41,13 +45,21 @@ class MessageController extends Controller
     {
         $userId = Auth::id();
 
-        // Mensajes recibidos
-        $received = Message::where('receiver_id', $userId)->get();
+        // Obtener todos los usuarios para poder seleccionar destinatario en la vista
+        $users = User::select('id', 'name')->get();
 
-        // Mensajes enviados
-        $sent = Message::where('sender_id', $userId)->get();
+        // Mensajes recibidos con relación al emisor cargada
+        $received = Message::with('sender')
+                    ->where('receiver_id', $userId)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
 
-        // Mostrar vista con los mensajes
-        return view('messages', compact('received', 'sent'));
+        // Mensajes enviados con relación al receptor cargada
+        $sent = Message::with('receiver')
+                    ->where('sender_id', $userId)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+        return view('messages.index', compact('users', 'received', 'sent'));
     }
 }

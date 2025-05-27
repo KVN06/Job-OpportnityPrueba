@@ -16,10 +16,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Archivos JS principales del proyecto -->
-    @vite('resources/js/app.js')
     @vite('resources/js/header/nav.js')
     @vite('resources/js/header/notification.js')
-    @vite('resources/js/home/home.js')
 
     <!-- Librerías externas: SweetAlert2 para alertas y Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -45,16 +45,22 @@
                             <!-- Imagen del usuario -->
                             <img src="Estilos/Imagenes/proyecto2.jpeg" alt="Usuario" class="w-8 h-8 rounded-full mr-2">
                             <div class="flex flex-col items-center">
-                                <!-- Nombre del usuario -->
-                                <span class="text-sm font-medium max-w-[120px] truncate">{{ auth()->user()->name }}</span>
-                                <!-- Rol del usuario: Empresa o Cesante -->
-                                <span class="text-xs text-gray-500 -mt-0.5">
+                                <span class="text-sm font-medium max-w-[120px] truncate">
                                     @if(auth()->user()->isCompany())
-                                        Empresa
+                                        {{ auth()->user()->company->company_name ?? auth()->user()->name }}
                                     @else
-                                        Cesante
+                                        {{ auth()->user()->name }}
                                     @endif
                                 </span>
+                                <span class="text-xs text-gray-500">
+                                    @if(auth()->user()->isUnemployed())
+                                        Cesante
+                                    @elseif(auth()->user()->isCompany())
+                                        Empresa
+                                    @endif
+                                </span>
+                                
+                                
                             </div>
                             <!-- Ícono de flecha para indicar que hay un menú desplegable -->
                             <i class="fas fa-chevron-down ml-2"></i>
@@ -64,7 +70,7 @@
                         <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50">
                             @if(auth()->user()->isUnemployed())
                                 <!-- Opción para ver el portafolio si es cesante -->
-                                <a href="{{ route('portfolio-list') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Portafolio</a>
+                                <a href="{{ route('portfolios.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Portafolio</a>
                             @endif
                             @if(auth()->user()->isCompany())
                                 <!-- Opción para gestionar ofertas si es empresa -->
@@ -98,7 +104,7 @@
                     <a href="#" class="block text-gray-600 hover:text-blue-600">Clasificados</a>
                     <a href="#" class="block text-gray-600 hover:text-blue-600">FAQs</a>
                     @if(auth()->user()->isUnemployed())
-                        <a href="{{ route('portfolio-list') }}" class="block text-gray-600 hover:text-blue-600">Portafolio</a>
+                        <a href="{{ route('portfolios.index') }}" class="block text-gray-600 hover:text-blue-600">Portafolio</a>
                     @endif
                     @if(auth()->user()->isCompany())
                         <a href="{{ route('job-offers.index') }}" class="block text-gray-600 hover:text-blue-600">Crear Oferta</a>
