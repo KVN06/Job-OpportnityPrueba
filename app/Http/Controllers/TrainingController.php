@@ -3,78 +3,121 @@
 namespace App\Http\Controllers;
 
 use App\Models\Training;
+use App\Services\TrainingService;
+use App\Http\Requests\TrainingRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TrainingController extends Controller
 {
-    // Muestra todas las capacitaciones
-    public function index()
+    protected $trainingService;
+
+    public function __construct(TrainingService $trainingService)
     {
-        $trainings = Training::all();
-        return view('training.index', compact('trainings'));
+        $this->middleware('auth');
+        $this->middleware('role:company,admin')->except(['index', 'show', 'enroll', 'complete']);
+        $this->trainingService = $trainingService;
     }
 
-    // Muestra el formulario de creación
+    public function index(Request $request)
+    {
+        try {
+            $filters = $request->only([
+                'search',
+                'type',
+                'level',
+                'status',
+                'price_min',
+                'price_max',
+                'start_date',
+                'end_date',
+                'company_id',
+                'per_page'
+            ]);
+
+            $trainings = $this->trainingService->getFilteredTrainings($filters);
+            return view('trainings.index', compact('trainings'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al cargar las capacitaciones: ' . $e->getMessage());
+        }
+    }
+
     public function create()
     {
-        return view('training.create');
+        return view('trainings.create');
     }
 
-    // Guarda una nueva capacitación
-    public function store(Request $request)
+    public function store(TrainingRequest $request)
     {
-        // Validación de los datos del formulario
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'provider' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'link' => 'nullable|url',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-        ]);
-
-        // Crea una nueva capacitación
-        Training::create($request->all());
-
-        // Redirige con un mensaje de éxito
-        return redirect()->route('training.index')->with('success', 'Capacitación registrada correctamente.');
+        try {
+            $training = $this->trainingService->create($request->validated());
+            return redirect()->route('trainings.show', $training)
+                           ->with('success', 'Capacitación creada correctamente.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->with('error', 'Error al crear la capacitación: ' . $e->getMessage());
+        }
     }
 
-    // Muestra el formulario de edición para una capacitación específica
-    public function edit($id)
+    public function show(Training $training)
     {
-        $training = Training::findOrFail($id);
-        return view('training.edit', compact('training'));
+        $training->load(['company', 'users']);
+        $isEnrolled = Auth::check() ? $training->users()->where('user_id', Auth::id())->exists() : false;
+        return view('trainings.show', compact('training', 'isEnrolled'));
     }
 
-    // Actualiza una capacitación
-    public function update(Request $request, $id)
+    public function edit(Training $training)
     {
-        // Validación de los datos del formulario
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'provider' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'link' => 'nullable|url',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-        ]);
-
-        // Encuentra y actualiza la capacitación
-        $training = Training::findOrFail($id);
-        $training->update($request->all());
-
-        // Redirige con un mensaje de éxito
-        return redirect()->route('training.index')->with('success', 'Capacitación actualizada correctamente.');
+        $this->authorize('update', $training);
+        return view('trainings.edit', compact('training'));
     }
 
-    // Elimina una capacitación
-    public function destroy($id)
+    public function update(TrainingRequest $request, Training $training)
     {
-        $training = Training::findOrFail($id);
-        $training->delete();
+        try {
+            $this->authorize('update', $training);
+            $training = $this->trainingService->update($training, $request->validated());
+            return redirect()->route('trainings.show', $training)
+                           ->with('success', 'Capacitación actualizada correctamente.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->with('error', 'Error al actualizar la capacitación: ' . $e->getMessage());
+        }
+    }
 
-        // Redirige con un mensaje de éxito
-        return redirect()->route('training.index')->with('success', 'Capacitación eliminada correctamente.');
+    public function destroy(Training $training)
+    {
+        try {
+            $this->authorize('delete', $training);
+            $this->trainingService->delete($training);
+            return redirect()->route('trainings.index')
+                           ->with('success', 'Capacitación eliminada correctamente.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al eliminar la capacitación: ' . $e->getMessage());
+        }
+    }
+
+    public function enroll(Training $training)
+    {
+        try {
+            $this->middleware('role:unemployed');
+            $this->trainingService->enrollUser($training, Auth::user());
+            return redirect()->route('trainings.show', $training)
+                           ->with('success', 'Te has inscrito correctamente en la capacitación.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al inscribirse en la capacitación: ' . $e->getMessage());
+        }
+    }
+
+    public function complete(Training $training)
+    {
+        try {
+            $this->middleware('role:unemployed');
+            $this->trainingService->completeTraining($training, Auth::user());
+            return redirect()->route('trainings.show', $training)
+                           ->with('success', 'Has completado la capacitación correctamente.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al marcar la capacitación como completada: ' . $e->getMessage());
+        }
     }
 }

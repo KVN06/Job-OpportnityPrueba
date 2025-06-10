@@ -3,46 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobOffer;
+use App\Models\Category;
+use App\Services\JobOfferService;
+use App\Http\Requests\JobOfferRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Category;
+use Illuminate\Support\Facades\Gate;
 
 class JobOfferController extends Controller
 {
+    protected $jobOfferService;
+
+    public function __construct(JobOfferService $jobOfferService)
+    {
+        $this->jobOfferService = $jobOfferService;
+    }
+
     // Mostrar listado de ofertas con filtros aplicables
     public function index(Request $request) {
-        $query = JobOffer::with(['company', 'categories']);
+        try {
+            $filters = $request->only([
+                'search',
+                'location',
+                'offer_type',
+                'category',
+                'salary_min',
+                'salary_max',
+                'company_id',
+                'status',
+                'per_page'
+            ]);
 
-        // Filtro por palabra clave en título o descripción
-        if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
-            });
+            $jobOffers = $this->jobOfferService->getFilteredJobOffers($filters);
+            $jobOffers->load(['company', 'categories', 'favoriteOffers']);
+            $categories = Category::all();
+
+            return view('job-offers.index', compact('jobOffers', 'categories'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al cargar las ofertas: ' . $e->getMessage());
         }
-
-        // Filtro por ubicación
-        if ($request->filled('location')) {
-            $query->where('location', $request->location);
-        }
-
-        // Filtro por tipo de oferta (tiempo completo, parcial, etc.)
-        if ($request->filled('offer_type')) {
-            $query->where('offer_type', $request->offer_type);
-        }
-
-        // Filtro por categoría
-        if ($request->filled('category')) {
-            $query->whereHas('categories', function($q) use ($request) {
-                $q->where('categories.id', $request->category);
-            });
-        }
-
-        // Paginación de resultados
-        $jobOffers = $query->latest()->paginate(10);
-        $categories = Category::all();
-
-        return view('job-offers.index', compact('jobOffers', 'categories'));
     }
 
     // Guardar oferta (desde formulario personalizado)
@@ -64,27 +63,42 @@ class JobOfferController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('job-offers.create', compact('categories'));
+        $offerType = request()->input('offer_type', JobOffer::TYPE_CONTRACT);
+        return view('job-offers.create', compact('categories', 'offerType'));
     }
 
     // Guardar nueva oferta laboral
-    public function store(Request $request)
+    public function store(JobOfferRequest $request)
     {
-        $jobOffer = new JobOffer($request->all());
-        $jobOffer->company_id = Auth::user()->company->id;
-        $jobOffer->save();
+        try {
+            $jobOffer = $this->jobOfferService->createJobOffer(
+                $request->validated(),
+                Auth::user()
+            );
 
-        // Asociar categorías seleccionadas
-        $jobOffer->categories()->attach($request->categories);
+            $message = $jobOffer->offer_type === JobOffer::TYPE_CLASSIFIED
+                ? 'Clasificado creado exitosamente.'
+                : 'Oferta laboral creada exitosamente.';
 
-        return redirect()->route('job-offers.index')
-                         ->with('success', 'Oferta laboral creada exitosamente.');
+            return redirect()
+                ->route('job-offers.show', $jobOffer)
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Error al crear la oferta: ' . $e->getMessage());
+        }
     }
 
     // Mostrar detalles de una oferta
     public function show(JobOffer $jobOffer)
     {
-        return view('job-offers.show', compact('jobOffer'));
+        $jobOffer->load(['company', 'categories', 'comments.user']);
+        $similarOffers = $this->jobOfferService->getSimilarJobOffers($jobOffer);
+        $canApply = Auth::check() && Auth::user()->canApplyTo($jobOffer);
+
+        return view('job-offers.show', compact('jobOffer', 'similarOffers', 'canApply'));
     }
 
     // Mostrar formulario de edición
@@ -95,23 +109,58 @@ class JobOfferController extends Controller
     }
 
     // Actualizar una oferta existente
-    public function update(Request $request, JobOffer $jobOffer)
+    public function update(JobOfferRequest $request, JobOffer $jobOffer)
     {
-        $jobOffer->update($request->all());
+        try {
+            $this->jobOfferService->updateJobOffer($jobOffer, $request->validated());
 
-        // Sincronizar nuevas categorías
-        $jobOffer->categories()->sync($request->categories);
+            return redirect()
+                ->route('job-offers.show', $jobOffer)
+                ->with('success', 'Oferta actualizada exitosamente.');
 
-        return redirect()->route('job-offers.show', $jobOffer)
-                         ->with('success', 'Oferta laboral actualizada exitosamente.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Error al actualizar la oferta: ' . $e->getMessage());
+        }
     }
 
     // Eliminar una oferta laboral
     public function destroy(JobOffer $jobOffer)
     {
-        $jobOffer->delete();
+        try {
+            $this->jobOfferService->deleteJobOffer($jobOffer);
 
-        return redirect()->route('job-offers.index')
-                         ->with('success', 'Oferta laboral eliminada exitosamente.');
+            return redirect()
+                ->route('job-offers.index')
+                ->with('success', 'Oferta eliminada exitosamente.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al eliminar la oferta: ' . $e->getMessage());
+        }
+    }
+
+    public function toggleStatus(JobOffer $jobOffer)
+    {
+        try {
+            $success = $this->jobOfferService->toggleStatus($jobOffer);
+            $status = $jobOffer->status ? 'activada' : 'desactivada';
+
+            if ($success) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Oferta {$status} exitosamente.",
+                    'status' => $jobOffer->status
+                ]);
+            }
+
+            throw new \Exception('No se pudo cambiar el estado de la oferta.');
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

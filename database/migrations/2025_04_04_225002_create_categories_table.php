@@ -14,8 +14,13 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug');
+            $table->enum('type', ['contract', 'classified'])->default('contract');
             $table->text('description')->nullable();
             $table->timestamps();
+            
+            // Crear índice compuesto único para name y type
+            $table->unique(['name', 'type']);
         });
     }
 

@@ -2,6 +2,7 @@
 
 @section('content')
 
+@auth
 @if(auth()->user()->type === 'company')
 
     {{-- Home para empresa --}}
@@ -49,14 +50,27 @@
         <section class="mb-12">
             <h2 class="text-2xl font-bold mb-6">Acciones Rápidas</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <a href="{{ route('job-offers.create') }}" class="group">
+                <!-- Botón para Ofertas Laborales (Contratos) -->
+                <a href="{{ route('job-offers.create', ['type' => 'contract']) }}" class="group">
                     <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
                         <div class="text-3xl text-blue-600 mb-3">
-                            <i class="fas fa-file-alt"></i>
+                            <i class="fas fa-building"></i>
                         </div>
-                        <h3 class="font-semibold text-lg mb-2 group-hover:text-blue-600">Publicar Oferta</h3>
-                        <p class="text-sm text-gray-600 mb-4">Crea y publica una nueva oferta laboral</p>
+                        <h3 class="font-semibold text-lg mb-2 group-hover:text-blue-600">Publicar Oferta Empresarial</h3>
+                        <p class="text-sm text-gray-600 mb-4">Crea y publica una oferta con contrato</p>
                         <span class="text-blue-600 text-sm font-medium">Crear ahora</span>
+                    </div>
+                </a>
+                
+                <!-- Botón para Clasificados -->
+                <a href="{{ route('job-offers.create', ['type' => 'classified']) }}" class="group">
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
+                        <div class="text-3xl text-yellow-600 mb-3">
+                            <i class="fas fa-clipboard"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2 group-hover:text-yellow-600">Publicar Clasificado</h3>
+                        <p class="text-sm text-gray-600 mb-4">Crea y publica un trabajo temporal</p>
+                        <span class="text-yellow-600 text-sm font-medium">Crear ahora</span>
                     </div>
                 </a>
                 <a href="#" class="group">
@@ -122,12 +136,12 @@
         <section class="mb-12">
             <h2 class="text-2xl font-bold mb-6">Acciones Rápidas</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="#" class="group cursor-not-allowed opacity-50">
+                <a href="{{ route('profile.edit') }}" class="group">
                     <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
                         <i class="fas fa-user-edit text-3xl text-blue-600 mb-3"></i>
                         <h3 class="font-semibold text-lg mb-2">Editar Perfil</h3>
-                        <p class="text-sm text-gray-600 mb-4">Funcionalidad no implementada</p>
-                        <span class="text-blue-600 text-sm font-medium">Próximamente</span>
+                        <p class="text-sm text-gray-600 mb-4">Personaliza tu información profesional</p>
+                        <span class="text-blue-600 text-sm font-medium">Editar ahora</span>
                     </div>
                 </a>
                 <a href="{{ route('portfolios.index') }}" class="group">
@@ -156,5 +170,60 @@
     <p class="text-center text-red-600 mt-20 font-semibold">Tipo de usuario desconocido.</p>
 
 @endif
+@else
+    {{-- Contenido para usuarios no autenticados --}}
+    <main class="container mx-auto py-8 px-6">
+        <section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-12 mb-12">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">Bienvenido a Job Opportunity</h1>
+                <p class="text-xl mb-8">Conectamos talento con las mejores oportunidades laborales</p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <a href="{{ route('register') }}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        Registrarse
+                    </a>
+                    <a href="{{ route('login') }}" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                        Iniciar Sesión
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">5,000+</div>
+                <div class="text-gray-600">Empleos Disponibles</div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">2,500+</div>
+                <div class="text-gray-600">Empresas Registradas</div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">75%</div>
+                <div class="text-gray-600">Tasa de Colocación</div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">¿Por qué elegir Job Opportunity?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-search text-3xl text-blue-600 mb-3"></i>
+                    <h3 class="font-semibold text-lg mb-2">Búsqueda Inteligente</h3>
+                    <p class="text-sm text-gray-600">Encuentra ofertas que se ajusten perfectamente a tu perfil profesional</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-handshake text-3xl text-green-600 mb-3"></i>
+                    <h3 class="font-semibold text-lg mb-2">Conexión Directa</h3>
+                    <p class="text-sm text-gray-600">Conecta directamente con empresas y reclutadores</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-graduation-cap text-3xl text-purple-600 mb-3"></i>
+                    <h3 class="font-semibold text-lg mb-2">Capacitación</h3>
+                    <p class="text-sm text-gray-600">Accede a cursos y capacitaciones para mejorar tus habilidades</p>
+                </div>
+            </div>
+        </section>
+    </main>
+@endauth
 
 @endsection

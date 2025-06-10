@@ -1,297 +1,247 @@
-@extends('layouts.app')
+@extends('layouts.home')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
+    <nav class="mb-4">
+        <ol class="flex text-gray-500 text-sm">
+            <li><a href="{{ route('job-offers.index') }}" class="hover:text-blue-600">Ofertas de Trabajo</a></li>
+            <li class="mx-2">/</li>
+            <li>{{ $jobOffer->title }}</li>
+        </ol>
+    </nav>
 
-        {{-- Navegación (breadcrumbs) --}}
-        <nav class="mb-8">
-            <ol class="flex text-gray-500 text-sm">
-                <li><a href="{{ route('job-offers.index') }}" class="hover:text-blue-600">Ofertas de Trabajo</a></li>
-                <li class="mx-2">/</li>
-                <li>{{ $jobOffer->title }}</li>
-            </ol>
-        </nav>
+    <div class="bg-white rounded-lg shadow p-6">
+        {{-- Encabezado con título y botones de acción --}}
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ $jobOffer->title }}</h1>
+                <p class="text-gray-600 mt-2">
+                    <span>{{ $jobOffer->company->company_name }}</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ $jobOffer->translated_offer_type }}</span>
+                    @if(!$jobOffer->isActive())
+                        <span class="mx-2">•</span>
+                        <span class="text-red-600 font-medium">{{ $jobOffer->status_text }}</span>
+                    @endif
+                </p>
+            </div>
+            @if(auth()->check() && $jobOffer->canBeEditedBy(auth()->user()))
+            <div class="flex space-x-2">
+                {{-- Botón de congelar --}}
+                <button type="button" 
+                        onclick="toggleJobOfferStatus({{ $jobOffer->id }})"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 freeze-btn">
+                    <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18M3 12h18M5.636 5.636l12.728 12.728M18.364 5.636L5.636 18.364"/>
+                    </svg>
+                    <span class="status-text">{{ $jobOffer->isActive() ? 'Congelar ' . $jobOffer->translated_offer_type : 'Activar ' . $jobOffer->translated_offer_type }}</span>
+                </button>
+                {{-- Botón de editar --}}
+                <a href="{{ route('job-offers.edit', $jobOffer) }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Editar {{ $jobOffer->translated_offer_type }}
+                </a>
+            </div>
+            @endif
+        </div>
 
-        {{-- Mensaje de éxito al aplicar o actualizar --}}
-        @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span class="block sm:inline">{{ session('success') }}</span>
+        {{-- Descripción --}}
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Descripción</h2>
+            <div class="text-gray-700">
+                {!! nl2br(e($jobOffer->description)) !!}
+            </div>
+        </div>
+
+        {{-- Salario y Ubicación en fila --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+                <h2 class="text-lg font-medium text-gray-900 mb-2">Salario</h2>
+                <p class="text-gray-700">{{ $jobOffer->salary ?? 'No especificado' }}</p>
+            </div>
+            
+            <div>
+                <h2 class="text-lg font-medium text-gray-900 mb-2">Ubicación</h2>
+                <p class="text-gray-700">{{ $jobOffer->location }}</p>
+            </div>
+        </div>
+
+        {{-- Geolocalización --}}
+        @if($jobOffer->geolocation)
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Geolocalización (Google Maps)</h2>
+            <p class="text-gray-600 text-sm">{{ $jobOffer->geolocation }}</p>
         </div>
         @endif
 
-        {{-- Cabecera de la oferta de trabajo --}}
-        <div class="bg-white shadow rounded-lg p-6 mb-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    {{-- Título y empresa --}}
-                    <h1 class="editable text-3xl font-bold text-gray-900 mb-2" data-field="title">{{ $jobOffer->title }}</h1>
-                    <div class="flex items-center text-gray-500">
-                        <a href="{{ route('companies.show', $jobOffer->company) }}" class="hover:text-blue-600">
-                            {{ $jobOffer->company->company_name }}
-                        </a>
-                        <span class="mx-2">•</span>
-                        <span>Publicado {{ $jobOffer->created_at->diffForHumans() }}</span>
-                    </div>
-                </div>
-
-                {{-- Botón de edición solo visible para usuarios autorizados --}}
-                <div class="flex space-x-4">
-                    @can('update', $jobOffer)
-                    <a href="{{ route('job-offers.edit', $jobOffer) }}" 
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                        {{-- Icono de lápiz --}}
-                        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                        Editar
-                    </a>
-                    @endcan
-                </div>
+        {{-- Categorías --}}
+        @if($jobOffer->categories->count() > 0)
+        <div class="mb-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Categorías</h2>
+            <div class="flex flex-wrap gap-2">
+                @foreach($jobOffer->categories as $category)
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                    {{ $category->name }}
+                </span>
+                @endforeach
             </div>
+        </div>
+        @endif
 
-            {{-- Información rápida: ubicación, tipo de trabajo, contrato, experiencia --}}
-            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-                {{-- Cada elemento representa un dato clave --}}
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Ubicación</dt>
-                    <dd class="editable mt-1 text-sm text-gray-900" data-field="location">{{ $jobOffer->location }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Tipo de trabajo</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ ucfirst($jobOffer->work_type) }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Contrato</dt>
-                    <dd class="editable mt-1 text-sm text-gray-900" data-field="contract_type">{{ ucfirst(str_replace('_', ' ', $jobOffer->contract_type)) }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Experiencia</dt>
-                    <dd class="editable mt-1 text-sm text-gray-900" data-field="experience_level">{{ ucfirst($jobOffer->experience_level) }}</dd>
-                </div>
-            </div>
-
-            {{-- Categorías asociadas a la oferta --}}
-            <div class="mt-6">
-                <div class="flex flex-wrap gap-2">
-                    @foreach($jobOffer->categories as $category)
-                    <span class="badge bg-primary">{{ $category->name }}</span>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- Estadísticas de la oferta (aplicaciones, vistas, fecha límite) --}}
-            <div class="mt-6 border-t border-gray-200 pt-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-6 text-sm text-gray-500">
-                        <span>{{ $jobOffer->applications->count() }} aplicaciones</span>
-                        <span>{{ $jobOffer->views_count }} vistas</span>
-                        @if($jobOffer->deadline)
-                        <span>Fecha límite: {{ $jobOffer->deadline->format('d/m/Y') }}</span>
-                        @endif
-                    </div>
-                    
-                    {{-- Botón para aplicar (si autorizado) --}}
-                    <div class="flex items-center space-x-4">
-                        @can('apply', $jobOffer)
-                        <button type="button" 
-                                onclick="document.getElementById('application-modal').classList.remove('hidden')"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                            Aplicar ahora
-                        </button>
-                        @endcan
-                    </div>
-                </div>
+        {{-- Estadísticas simples --}}
+        <div class="mt-6 pt-6 border-t border-gray-200">
+            <div class="flex space-x-4 text-sm text-gray-500">
+                <span>{{ $jobOffer->applications_count ?? 0 }} aplicaciones</span>
+                <span>{{ $jobOffer->views_count ?? 0 }} vistas</span>
             </div>
         </div>
 
-        {{-- Sección principal y sidebar --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            {{-- Columna principal --}}
-            <div class="md:col-span-2 space-y-6">
-
-                {{-- Descripción del puesto --}}
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Descripción del puesto</h2>
-                    <div class="prose max-w-none">
-                        <p class="editable" data-field="description">{!! nl2br(e($jobOffer->description)) !!}</p>
+        {{-- Botón de Aplicar --}}
+        @auth
+        <div class="mt-8">
+            @if($jobOffer->isActive())
+                @if($canApply)
+                    <button type="button" 
+                            onclick="document.getElementById('application-modal').classList.remove('hidden')"
+                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Aplicar a esta oferta
+                </button>
+                @elseif(auth()->user()->isUnemployed() && auth()->user()->unemployed->hasAppliedTo($jobOffer))
+                    <div class="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <p class="text-green-700 font-medium">Ya te has postulado a esta oferta</p>
+                        </div>
+                        <p class="text-green-600 text-sm mt-1">Espera notificaciones para saber si eres seleccionado</p>
                     </div>
-                </div>
-
-                {{-- Requisitos (si existen) --}}
-                @if($jobOffer->requirements)
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Requisitos</h2>
-                    <div class="prose max-w-none">
-                        {!! nl2br(e($jobOffer->requirements)) !!}
+                @else
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-gray-600">No puedes aplicar a esta oferta</p>
                     </div>
-                </div>
                 @endif
-
-                {{-- Beneficios (si existen) --}}
-                @if($jobOffer->benefits)
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Beneficios</h2>
-                    <div class="prose max-w-none">
-                        {!! nl2br(e($jobOffer->benefits)) !!}
-                    </div>
+            @else
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <p class="text-gray-600">Esta oferta no está disponible temporalmente</p>
                 </div>
-                @endif
-            </div>
-
-            {{-- Sidebar --}}
-            <div class="space-y-6">
-
-                {{-- Información sobre la empresa --}}
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold mb-4">Sobre la empresa</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <h3 class="font-medium text-gray-900">{{ $jobOffer->company->company_name }}</h3>
-                            @if($jobOffer->company->description)
-                            <p class="mt-1 text-sm text-gray-500">{{ $jobOffer->company->description }}</p>
-                            @endif
-                        </div>
-                        <div>
-                            <a href="{{ route('companies.show', $jobOffer->company) }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
-                                Ver perfil completo →
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Información salarial --}}
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold mb-4">Información salarial</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Rango salarial</dt>
-                            <dd class="editable mt-1 text-sm text-gray-900" data-field="salary">{{ $jobOffer->salary_range }}</dd>
-                        </div>
-                        @if($jobOffer->salary_currency)
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Moneda</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ $jobOffer->salary_currency }}</dd>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-
-            </div>
+            @endif
         </div>
-
+        @else
+        <div class="mt-8">
+            <a href="{{ route('login') }}" 
+               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                Inicia sesión para aplicar
+            </a>
+        </div>
+        @endauth
     </div>
 </div>
 
-{{-- Modal para aplicar a la oferta --}}
-<div id="application-modal" class="fixed z-10 inset-0 overflow-y-auto hidden" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+{{-- Modal de Aplicación --}}
+<div id="application-modal" class="fixed inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen p-4 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full">
-
-            {{-- Formulario de aplicación --}}
-            <form action="{{ route('job-offers.apply', $jobOffer) }}" method="POST">
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form action="{{ route('applications.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="job_offer_id" value="{{ $jobOffer->id }}">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                     <h3 class="text-lg font-medium text-gray-900">Aplicar a: {{ $jobOffer->title }}</h3>
                     <div class="mt-4">
-                        <label for="message" class="block text-sm font-medium text-gray-700">Mensaje de presentación</label>
-                        <textarea id="message" name="message" rows="4" class="block w-full border-gray-300 rounded-md" required></textarea>
+                        <label for="message" class="block text-sm font-medium text-gray-700">
+                            Mensaje de presentación
+                        </label>
+                        <textarea id="message" name="message" rows="4" 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            required></textarea>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enviar aplicación</button>
-                    <button type="button" class="btn btn-secondary ml-3" onclick="document.getElementById('application-modal').classList.add('hidden')">Cancelar</button>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" 
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Enviar aplicación
+                    </button>
+                    <button type="button" 
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                        onclick="document.getElementById('application-modal').classList.add('hidden')">
+                        Cancelar
+                    </button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
 
-{{-- Script para editar campos inline --}}
-@can('update', $jobOffer)
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const editables = document.querySelectorAll('.editable');
+@if (session('success'))
+<div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+    {{ session('success') }}
+</div>
+@endif
 
-            editables.forEach(element => {
-                element.addEventListener('click', function() {
-                    if (this.isEditing) return;
+@if (session('error'))
+<div id="notification" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
+    {{ session('error') }}
+</div>
+@endif
 
-                    const field = this.dataset.field;
-                    const currentValue = this.innerText;
+<script>
+    setTimeout(function() {
+        const notification = document.getElementById('notification');
+        if (notification) {
+            notification.style.display = 'none';
+        }
+    }, 5000);
+</script>
+@endsection
 
-                    let input;
-                    if (field === 'description') {
-                        input = document.createElement('textarea');
-                        input.rows = 4;
-                    } else if (field === 'contract_type' || field === 'experience_level') {
-                        input = document.createElement('select');
-                        const options = field === 'contract_type' 
-                            ? ['tiempo_completo', 'medio_tiempo', 'proyecto', 'practicas'] 
-                            : ['junior', 'medio', 'senior', 'lead'];
-                        options.forEach(opt => {
-                            const option = document.createElement('option');
-                            option.value = opt;
-                            option.text = opt.replace('_', ' ');
-                            option.selected = opt === currentValue;
-                            input.appendChild(option);
-                        });
-                    } else {
-                        input = document.createElement('input');
-                        input.type = field === 'salary' ? 'number' : 'text';
-                        input.step = field === 'salary' ? '0.01' : null;
-                    }
+@section('scripts')
+<script>
+const toggleJobOfferStatus = async (jobOfferId) => {
+    try {
+        if (!confirm('¿Estás seguro que deseas cambiar el estado de esta oferta?')) {
+            return;
+        }
 
-                    input.value = currentValue;
-                    this.innerHTML = '';
-                    this.appendChild(input);
-                    this.isEditing = true;
-                    input.focus();
-
-                    const saveChanges = () => {
-                        const newValue = input.value;
-                        fetch(`/ofertas/${{{ $jobOffer->id }}}/inline`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({ field: field, value: newValue })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                this.innerHTML = data.value;
-                            } else {
-                                alert(data.error);
-                                this.innerHTML = currentValue;
-                            }
-                            this.isEditing = false;
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Error al actualizar el campo');
-                            this.innerHTML = currentValue;
-                            this.isEditing = false;
-                        });
-                    };
-
-                    input.addEventListener('blur', saveChanges);
-                    input.addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter' && field !== 'description') {
-                            e.preventDefault();
-                            saveChanges();
-                        }
-                    });
-                });
-            });
+        const toggleStatusUrl = `{{ url('job-offers') }}/${jobOfferId}/toggle-status`;
+        const response = await fetch(toggleStatusUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
         });
-    </script>
-    @endpush
-@endcan
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Recargar la página para mostrar los cambios
+            location.reload();
+        } else {
+            throw new Error(data.message || 'Error al cambiar el estado de la oferta');
+        }
+    } catch (error) {
+        // Manejo de error removido para producción
+    }
+};
+
+// Auto-ocultar notificaciones
+document.addEventListener('DOMContentLoaded', () => {
+    const notification = document.getElementById('notification');
+    if (notification) {
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+});
+</script>
 @endsection

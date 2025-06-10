@@ -13,14 +13,20 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('sender_id');
-            $table->unsignedBigInteger('receiver_id');
+            $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('parent_id')->nullable()->constrained('messages')->onDelete('cascade');
+            $table->string('subject')->nullable();
             $table->text('content');
-            $table->timestamp('sent_at')->useCurrent();
+            $table->timestamp('read_at')->nullable();
+            $table->boolean('deleted_by_sender')->default(false);
+            $table->boolean('deleted_by_receiver')->default(false);
             $table->timestamps();
 
-            $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('receiver_id')->references('id')->on('users')->onDelete('cascade');
+            // Indexes for better query performance
+            $table->index(['sender_id', 'created_at']);
+            $table->index(['receiver_id', 'created_at']);
+            $table->index('parent_id');
         });
     }
 

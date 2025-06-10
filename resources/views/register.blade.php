@@ -1,7 +1,7 @@
 @extends('layouts.new-user')
 
 @section('content')
-<form action="{{ route('create-user') }}" method="POST" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg mt-12 mb-12">
+<form action="{{ route('register') }}" method="POST" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg mt-12 mb-12">
     @csrf
 
     <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Registro de Usuario</h1>
@@ -70,22 +70,74 @@
         @enderror
     </div>
 
-    {{-- Tipo de Usuario --}}
+    {{-- Confirmar Contraseña --}}
     <div class="mb-8">
-        <label for="type" class="block text-gray-700 font-semibold mb-2">Tipo de Usuario</label>
-        <select
-            name="type"
-            id="type"
+        <label for="password_confirmation" class="block text-gray-700 font-semibold mb-2">Confirmar Contraseña</label>
+        <input
+            type="password"
+            id="password_confirmation"
+            name="password_confirmation"
+            placeholder="Confirma tu contraseña"
             required
-            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800
+            autocomplete="new-password"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 placeholder-gray-400
                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         >
-            <option value="" disabled selected>Seleccione una opción</option>
-            <option value="unemployed" {{ old('type') == 'unemployed' ? 'selected' : '' }}>Cesante</option>
-            <option value="company" {{ old('type') == 'company' ? 'selected' : '' }}>Empresa</option>
-        </select>
-        @error('type')
+        @error('password_confirmation')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+
+    {{-- Tipo de Usuario con tarjetas visuales --}}
+    <div class="mb-8">
+        <label class="block text-gray-700 font-semibold mb-4">Selecciona tu rol</label>
+        <div class="grid grid-cols-2 gap-4">
+            {{-- Tarjeta Cesante --}}
+            <label class="cursor-pointer group">
+                <input type="radio" name="type" value="unemployed" class="peer hidden" {{ old('type') == 'unemployed' ? 'checked' : '' }} required>
+                <div class="border-2 rounded-lg p-4 hover:border-blue-500 transition-all duration-200 h-full
+                           group-hover:shadow-md group-hover:-translate-y-1
+                           peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg
+                           {{ old('type') == 'unemployed' ? 'border-blue-500 bg-blue-50 shadow-lg' : 'border-gray-200' }}">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="rounded-full bg-blue-100 p-3 mb-3 transform transition-transform group-hover:scale-110">
+                            <i class="fas fa-user-tie text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Cesante</h3>
+                        <p class="text-sm text-gray-600">Encuentra tu próxima oportunidad laboral y conecta con empresas que buscan tu talento</p>
+                        <!-- Indicador de selección -->
+                        <div class="absolute top-3 right-3 transform scale-0 transition-transform peer-checked:scale-100
+                                  text-blue-500 bg-blue-100 rounded-full p-1">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </label>
+
+            {{-- Tarjeta Empresa --}}
+            <label class="cursor-pointer group">
+                <input type="radio" name="type" value="company" class="peer hidden" {{ old('type') == 'company' ? 'checked' : '' }}>
+                <div class="border-2 rounded-lg p-4 hover:border-blue-500 transition-all duration-200 h-full
+                           group-hover:shadow-md group-hover:-translate-y-1
+                           peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg
+                           {{ old('type') == 'company' ? 'border-blue-500 bg-blue-50 shadow-lg' : 'border-gray-200' }}">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="rounded-full bg-blue-100 p-3 mb-3 transform transition-transform group-hover:scale-110">
+                            <i class="fas fa-building text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Empresa</h3>
+                        <p class="text-sm text-gray-600">Publica ofertas de trabajo y encuentra los mejores talentos para tu organización</p>
+                        <!-- Indicador de selección -->
+                        <div class="absolute top-3 right-3 transform scale-0 transition-transform peer-checked:scale-100
+                                  text-blue-500 bg-blue-100 rounded-full p-1">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </label>
+        </div>
+        @error('type')
+            <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
         @enderror
     </div>
 
@@ -128,5 +180,51 @@
         }
     });
 </script>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleCards = document.querySelectorAll('input[name="type"]');
+    const form = document.querySelector('form');
+
+    // Función para validar la selección del rol antes de enviar
+    form.addEventListener('submit', function(e) {
+        const roleSelected = Array.from(roleCards).some(radio => radio.checked);
+        if (!roleSelected) {
+            e.preventDefault();
+            alert('Por favor, selecciona un rol (Cesante o Empresa)');
+            document.querySelector('.mb-8').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // Agregar efecto de clic y validación visual
+    roleCards.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Reproducir efecto de sonido sutil (opcional)
+            const audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAACAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs4EqWAAAAAAAAAAAAAAAAAAAA//MUZAAAAAGkAAAAAAAAA0gAAAAATEFN//MUZAMAAAGkAAAAAAAAA0gAAAAARTMz//MUZAYAAAGkAAAAAAAAA0gAAAAANVVV');
+            audio.volume = 0.2;
+            audio.play();
+
+            // Añadir clase de animación a la tarjeta seleccionada
+            const selectedCard = this.nextElementSibling;
+            selectedCard.classList.add('scale-105');
+            setTimeout(() => selectedCard.classList.remove('scale-105'), 200);
+
+            // Mostrar mensaje de confirmación
+            const roleType = this.value === 'unemployed' ? 'Cesante' : 'Empresa';
+            const confirmMessage = document.createElement('div');
+            confirmMessage.className = 'text-sm text-blue-600 mt-2 text-center transition-opacity duration-500';
+            confirmMessage.textContent = `Has seleccionado el rol de ${roleType}`;
+            
+            // Remover mensaje anterior si existe
+            const prevMessage = document.querySelector('.text-sm.text-blue-600.mt-2');
+            if (prevMessage) prevMessage.remove();
+            
+            // Insertar nuevo mensaje
+            this.closest('.mb-8').appendChild(confirmMessage);
+            setTimeout(() => confirmMessage.remove(), 2000);
+        });
+    });
+});
+</script>
+@endpush
 @endsection
-    

@@ -35,7 +35,7 @@
                         <!-- Información adicional: ubicación, tipo, geolocalización -->
                         <div class="flex items-center mt-2 text-sm text-gray-500">
                             <span class="mr-4">{{ $jobOffer->location }}</span>
-                            <span class="mr-4">{{ $jobOffer->offer_type }}</span>
+                            <span class="mr-4">{{ $jobOffer->translated_offer_type }}</span>
                             @if($jobOffer->geolocation)
                                 <span><i class="fas fa-map-marker-alt"></i> Ver en mapa</span>
                             @endif
@@ -89,7 +89,7 @@
 <script>
 // Función para alternar el estado de favorito
 function toggleFavorite(jobOfferId) {
-    fetch(`/ofertas/${jobOfferId}/favorite`, {
+    fetch(`/job-offers/${jobOfferId}/favorite`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

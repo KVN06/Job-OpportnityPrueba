@@ -16,10 +16,22 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('link')->nullable();
-            $table->string('provider')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->string('provider');
+            $table->string('category');
+            $table->enum('level', ['beginner', 'intermediate', 'advanced'])->default('beginner');
+            $table->integer('duration')->nullable()->comment('Duration in hours');
+            $table->decimal('cost', 10, 2)->nullable();
+            $table->string('image_path')->nullable();
+            $table->datetime('start_date');
+            $table->datetime('end_date');
+            $table->integer('max_participants')->nullable();
+            $table->enum('status', ['draft', 'upcoming', 'ongoing', 'completed', 'cancelled'])->default('draft');
+            $table->boolean('certification_available')->default(false);
             $table->timestamps();
+
+            $table->index(['status', 'start_date']);
+            $table->index('category');
+            $table->index('level');
         });
     }
 

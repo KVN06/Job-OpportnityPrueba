@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('job_offer_id');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
+            $table->morphs('commentable');
             $table->text('content');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('job_offer_id')->references('id')->on('job_offers')->onDelete('cascade');
+            // Indexes for better query performance
+            $table->index(['commentable_type', 'commentable_id']);
+            $table->index(['user_id', 'created_at']);
+            $table->index('parent_id');
         });
     }
 

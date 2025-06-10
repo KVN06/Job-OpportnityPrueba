@@ -3,11 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\Portfolio;
+use App\Services\PortfolioService;
+use App\Http\Requests\PortfolioRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PortfolioController extends Controller
 {
+    protected $portfolioService;
+
+    public function __construct(PortfolioService $portfolioService)
+    {
+        $this->middleware('auth');
+        $this->middleware('role:unemployed')->except(['show', 'index']);
+        $this->portfolioService = $portfolioService;
+    }
+
+    // Mostrar todos los portafolios del usuario desempleado actual
+    public function index(Request $request)
+    {
+        try {
+            $filters = $request->only([
+                'search',
+                'status',
+                'technologies',
+                'per_page'
+            ]);
+
+            $portfolios = $this->portfolioService->getFilteredPortfolios($filters, Auth::user());
+            return view('portfolio.list', compact('portfolios'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al cargar los portafolios: ' . $e->getMessage());
+        }
+    }
+
     // Mostrar formulario para crear un nuevo portafolio
     public function create()
     {
@@ -15,77 +44,55 @@ class PortfolioController extends Controller
     }
 
     // Guardar un nuevo portafolio en la base de datos
-    public function store(Request $request)
-{
-    // Validación de campos
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'url_proyect' => 'required|url',
-        'url_pdf' => 'nullable|file|mimes:pdf|max:2048',
-    ]);
-
-    // Crear nuevo portafolio
-    $portfolio = new Portfolio();
-    $portfolio->unemployed_id = Auth::user()->unemployed->id;
-    $portfolio->title = $request->title;
-    $portfolio->description = $request->description;
-    $portfolio->url_proyect = $request->url_proyect;
-
-    // Si se subió un archivo PDF, lo almacenamos
-    if ($request->hasFile('url_pdf')) {
-        $file = $request->file('url_pdf');
-        $nombreArchivo = 'pdf_' . time() . '.' . $file->guessExtension();
-        $file->storeAs('public/portfolios', $nombreArchivo);
-        $portfolio->url_pdf = $nombreArchivo;
+    public function store(PortfolioRequest $request)
+    {
+        try {
+            $portfolio = $this->portfolioService->create($request->validated(), Auth::user());
+            return redirect()->route('portfolios.show', $portfolio)
+                           ->with('success', 'Portafolio creado correctamente.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->with('error', 'Error al crear el portafolio: ' . $e->getMessage());
+        }
     }
 
-    $portfolio->save();
-
-    return redirect()->route('portfolios.index');
-}
-
-    // Mostrar todos los portafolios del usuario desempleado actual
-    public function list()
+    // Mostrar un portafolio específico
+    public function show(Portfolio $portfolio)
     {
-        $portfolios = Portfolio::where('unemployed_id', Auth::user()->unemployed->id)->get();
-        return view('portfolio.list', compact('portfolios'));
+        return view('portfolio.show', compact('portfolio'));
     }
 
     // Mostrar formulario para editar un portafolio existente
-    public function edit($id)
+    public function edit(Portfolio $portfolio)
     {
-        $portfolio = Portfolio::findOrFail($id);
+        $this->authorize('update', $portfolio);
         return view('portfolio.edit', compact('portfolio'));
     }
 
     // Actualizar los datos de un portafolio existente
-    public function update(Request $request, $id)
+    public function update(PortfolioRequest $request, Portfolio $portfolio)
     {
-        // Validar campos requeridos
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'url_proyect' => 'required|url',
-            'url_pdf' => 'nullable|file|mimes:pdf|max:2048',
-        ]);
-
-        // Actualizar portafolio
-        $portfolio = Portfolio::findOrFail($id);
-        $portfolio->title = $request->title;
-        $portfolio->description = $request->description;
-        $portfolio->file_url = $request->file_url;
-        $portfolio->save();
-
-        return redirect()->route('portfolios.index');
+        try {
+            $this->authorize('update', $portfolio);
+            $portfolio = $this->portfolioService->update($portfolio, $request->validated());
+            return redirect()->route('portfolios.show', $portfolio)
+                           ->with('success', 'Portafolio actualizado correctamente.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->with('error', 'Error al actualizar el portafolio: ' . $e->getMessage());
+        }
     }
 
     // Eliminar un portafolio
-    public function destroy($id)
+    public function destroy(Portfolio $portfolio)
     {
-        $portfolio = Portfolio::findOrFail($id);
-        $portfolio->delete();
-
-        return redirect()->route('portfolios.index');
+        try {
+            $this->authorize('delete', $portfolio);
+            $this->portfolioService->delete($portfolio);
+            return redirect()->route('portfolios.index')
+                           ->with('success', 'Portafolio eliminado correctamente.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al eliminar el portafolio: ' . $e->getMessage());
+        }
     }
 }

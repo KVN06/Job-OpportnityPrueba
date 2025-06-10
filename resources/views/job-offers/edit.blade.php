@@ -52,19 +52,8 @@
                 @enderror
             </div>
 
-            <!-- Campo para editar el tipo de oferta -->
-            <div class="mb-4">
-                <label for="offer_type" class="block text-sm font-medium text-gray-700">Tipo de Oferta</label>
-                <select name="offer_type" id="offer_type" 
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                    <option value="">Seleccione un tipo de oferta</option>
-                    <option value="contract" {{ old('offer_type', $jobOffer->offer_type) == 'contract' ? 'selected' : '' }}>Contrato</option>
-                    <option value="classified" {{ old('offer_type', $jobOffer->offer_type) == 'classified' ? 'selected' : '' }}>Clasificado</option>
-                </select>
-                @error('offer_type')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p> <!-- Mensaje de error para tipo de oferta -->
-                @enderror
-            </div>
+            <!-- El tipo de oferta se mantiene como estaba -->
+            <input type="hidden" name="offer_type" value="{{ $jobOffer->offer_type }}">
 
             <!-- Sección para editar las categorías asociadas a la oferta -->
             <div class="mb-4">

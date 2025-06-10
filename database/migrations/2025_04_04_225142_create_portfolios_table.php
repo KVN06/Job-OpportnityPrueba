@@ -13,14 +13,23 @@ return new class extends Migration
     {
         Schema::create('portfolios', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('unemployed_id');
+            $table->foreignId('unemployed_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('url_proyect');
-            $table->string('url_pdf')->nullable();
+            $table->string('url')->nullable();
+            $table->string('image_path')->nullable();
+            $table->enum('project_type', ['personal', 'professional', 'academic', 'open_source'])->default('personal');
+            $table->json('technologies')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->boolean('is_featured')->default(false);
+            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->timestamps();
-    
-            $table->foreign('unemployed_id')->references('id')->on('unemployeds')->onDelete('cascade');
+
+            // Indexes for better query performance
+            $table->index(['unemployed_id', 'status']);
+            $table->index('project_type');
+            $table->index('is_featured');
         });
     }
 

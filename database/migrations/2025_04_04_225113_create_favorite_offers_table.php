@@ -12,12 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('favorite_offers', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('unemployed_id')->constrained('unemployeds')->onDelete('cascade');
             $table->foreignId('job_offer_id')->constrained()->onDelete('cascade');
-            $table->timestamp('added_at')->useCurrent();
+            $table->text('notes')->nullable();
+            $table->json('notification_preferences')->nullable();
             $table->timestamps();
+
+            // Ensure unique favorites per user
+            $table->unique(['unemployed_id', 'job_offer_id']);
             
-            $table->primary(['unemployed_id', 'job_offer_id']);
+            // Indexes for better query performance
+            $table->index(['unemployed_id', 'created_at']);
+            $table->index(['job_offer_id', 'created_at']);
         });
     }
 

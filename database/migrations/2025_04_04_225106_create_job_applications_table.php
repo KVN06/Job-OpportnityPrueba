@@ -13,14 +13,20 @@ return new class extends Migration
     {
         Schema::create('job_applications', function (Blueprint $table) {
             $table->id();
-        $table->text('message')->nullable();
-        $table->unsignedBigInteger('unemployed_id')->nullable();
-        $table->foreign('unemployed_id')->references('id')->on('unemployeds')->onDelete('cascade');
+            $table->unsignedBigInteger('unemployed_id');
+            $table->unsignedBigInteger('job_offer_id');
+            $table->text('cover_letter')->nullable();
+            $table->string('resume_path')->nullable();
+            $table->enum('status', ['pending', 'reviewing', 'interviewed', 'accepted', 'rejected', 'withdrawn'])->default('pending');
+            $table->timestamp('application_date')->useCurrent();
+            $table->text('notes')->nullable();
+            $table->timestamps();
 
-        $table->unsignedBigInteger('job_offer_id')->nullable();
-        $table->foreign('job_offer_id')->references('id')->on('job_offers')->onDelete('cascade');
-
-        $table->timestamp('applied_at')->useCurrent();
+            $table->foreign('unemployed_id')->references('id')->on('unemployeds')->onDelete('cascade');
+            $table->foreign('job_offer_id')->references('id')->on('job_offers')->onDelete('cascade');
+            
+            // Ensure one application per job per user
+            $table->unique(['unemployed_id', 'job_offer_id']);
         });
     }
 

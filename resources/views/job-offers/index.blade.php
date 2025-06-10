@@ -8,7 +8,7 @@
             {{-- Mostrar botón "Ofertas Favoritas" solo si el usuario está desempleado --}}
             @if(auth()->user() && auth()->user()->unemployed)
                 {{-- NOTA: Esta ruta debe existir en las rutas web.php --}}
-                <a href="{{ route('favorite-offers.index') }}" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                <a href="{{ route('favorites.index') }}" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center">
                     {{-- Ícono de estrella --}}
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -16,18 +16,26 @@
                     Ofertas Favoritas
                 </a>
             @endif
-            {{-- Mostrar botón "Crear Nueva Oferta" solo si el usuario es empresa --}}
-            @if(auth()->user()->isCompany())
-                <a href="{{ route('job-offers.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    Crear Nueva Oferta
+            {{-- Mostrar botones de creación según el rol del usuario --}}
+            <div class="flex space-x-4">
+                @if(auth()->user()->isCompany())
+                    <a href="{{ route('job-offers.create', ['type' => 'contract']) }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <i class="fas fa-building mr-2"></i>
+                        Crear Oferta Laboral
+                    </a>
+                @endif
+                {{-- Clasificados disponibles para todos los roles --}}
+                <a href="{{ route('job-offers.create', ['type' => 'classified']) }}" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center">
+                    <i class="fas fa-clipboard mr-2"></i>
+                    Crear Clasificado
                 </a>
-            @endif
+            </div>
         </div>
     </div>
 
     <!-- Sección de filtros de búsqueda -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <form action="{{ route('job-offers.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form action="{{ route('job-offers.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Filtro por texto --}}
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700">Buscar</label>
@@ -38,9 +46,9 @@
                 <label for="location" class="block text-sm font-medium text-gray-700">Ubicación</label>
                 <input type="text" name="location" id="location" value="{{ request('location') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
-            {{-- Filtro por tipo de oferta --}}
+            {{-- Filtro por tipo de empleo --}}
             <div>
-                <label for="offer_type" class="block text-sm font-medium text-gray-700">Tipo de Oferta</label>
+                <label for="offer_type" class="block text-sm font-medium text-gray-700">Tipo de Empleo</label>
                 <select name="offer_type" id="offer_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">Todos</option>
                     <option value="contract" {{ request('offer_type') == 'contract' ? 'selected' : '' }}>Contrato</option>
@@ -77,7 +85,7 @@
                         <div class="flex items-start justify-between">
                             {{-- Título de la oferta --}}
                             <h2 class="text-xl font-semibold text-gray-800">
-                                <a href="" class="hover:text-blue-600 transition-colors">
+                                <a href="{{ route('job-offers.show', $jobOffer) }}" class="hover:text-blue-600 transition-colors">
                                     {{ $jobOffer->title }}
                                 </a>
                             </h2>
@@ -87,9 +95,12 @@
                         {{-- Ubicación y tipo de oferta --}}
                         <div class="flex items-center mt-2 text-sm text-gray-500">
                             <span class="mr-4">{{ $jobOffer->location }}</span>
-                            <span class="mr-4">{{ $jobOffer->offer_type }}</span>
+                            <span class="mr-4">{{ $jobOffer->translated_offer_type }}</span>
                             @if($jobOffer->geolocation)
-                                <span><i class="fas fa-map-marker-alt"></i> Ver en mapa</span>
+                                <span class="mr-4"><i class="fas fa-map-marker-alt"></i> Ver en mapa</span>
+                            @endif
+                            @if(!$jobOffer->isActive())
+                                <span class="text-red-600 font-medium mr-4">• {{ $jobOffer->status_text }}</span>
                             @endif
                         </div>
                         {{-- Categorías de la oferta --}}
@@ -106,12 +117,15 @@
                     <div class="text-right">
                         @if(auth()->user() && auth()->user()->unemployed)
                             {{-- Botón de favorito --}}
-                            <button onclick="toggleFavorite({{ $jobOffer->id }})" 
-                                    class="favorite-btn mb-2 text-gray-400 hover:text-yellow-500 transition-colors"
-                                    data-offer-id="{{ $jobOffer->id }}">
-                                <svg class="w-6 h-6" fill="{{ auth()->user()->unemployed->favoriteOffers->contains($jobOffer->id) ? 'currentColor' : 'none' }}" 
+                            @php
+                                $isFavorite = $jobOffer->favoriteOffers->where('unemployed_id', auth()->user()->unemployed->id)->count() > 0;
+                            @endphp
+                            <button onclick="toggleFavorite({{ $jobOffer->id }})"
+                                    class="favorite-btn mb-2 {{ $isFavorite ? 'text-yellow-500' : 'text-gray-400' }} hover:text-yellow-500 transition-colors"
+                                    data-offer-id="{{ $jobOffer->id }}" data-favorite="{{ $isFavorite ? 'true' : 'false' }}">
+                                <svg class="w-6 h-6" fill="{{ $isFavorite ? 'currentColor' : 'none' }}"
                                         stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
                                     </path>
                                 </svg>
@@ -155,26 +169,21 @@
 <script>
 // Función para alternar estado favorito de una oferta
 function toggleFavorite(jobOfferId) {
-    fetch(`/ofertas/${jobOfferId}/favorite`, {
+    const button = document.querySelector(`.favorite-btn[data-offer-id="${jobOfferId}"]`);
+    const svg = button.querySelector('svg');
+    button.disabled = true;
+    fetch(`/job-offers/${jobOfferId}/favorite`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Accept': 'application/json'
         },
         credentials: 'same-origin'
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Actualizar el estado del botón y el ícono
-            const button = document.querySelector(`.favorite-btn[data-offer-id="${jobOfferId}"]`);
-            const svg = button.querySelector('svg');
+            button.dataset.favorite = data.isFavorite ? 'true' : 'false';
             if (data.isFavorite) {
                 svg.setAttribute('fill', 'currentColor');
                 button.classList.remove('text-gray-400');
@@ -186,9 +195,8 @@ function toggleFavorite(jobOfferId) {
             }
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Hubo un error al procesar tu solicitud. Por favor, intenta de nuevo.');
+    .finally(() => {
+        button.disabled = false;
     });
 }
 </script>

@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <form action="{{ route('inicia-sesion') }}" method="POST" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <form action="{{ route('login') }}" method="POST" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
         @csrf
 
         <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">Iniciar Sesión</h1>
